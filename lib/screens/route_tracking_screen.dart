@@ -161,6 +161,15 @@ class _RouteTrackingScreenState extends State<RouteTrackingScreen> {
         });
 
         return Scaffold(
+          appBar: AppBar(
+            title: Row(
+              children: [
+                Image.asset('assets/images/logo.png', height: 32),
+                const SizedBox(width: 12),
+                const Text('Route Tracking'),
+              ],
+            ),
+          ),
           body: Stack(
             children: [
               // Google Map
@@ -176,75 +185,113 @@ class _RouteTrackingScreenState extends State<RouteTrackingScreen> {
                 zoomControlsEnabled: false,
               ),
 
-              // Back button
-              Positioned(
-                top: 50,
-                left: 16,
-                child: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-              ),
-
               // Top overlay card
               Positioned(
-                top: 50,
-                left: 70,
+                top: 20,
+                left: 16,
                 right: 16,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceColor,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        appState.routeName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
+                child: AppTheme.professionalCard(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.route_rounded, color: AppTheme.primaryColor),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                appState.routeName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textPrimary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                appState.tripStatus,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        appState.tripStatus,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: appState.isTripActive ? Colors.green : Colors.orange,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
 
-              // Center on Bus floating button
+              // Bottom Control Panel
               Positioned(
-                bottom: 100,
+                bottom: 30,
+                left: 16,
                 right: 16,
-                child: FloatingActionButton.extended(
-                  onPressed: _centerOnBus,
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  label: const Text(
-                    'Center on Bus',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  icon: const Icon(Icons.my_location),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // Center on Bus Button
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: FloatingActionButton.extended(
+                        heroTag: 'center_bus',
+                        onPressed: _centerOnBus,
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        icon: const Icon(Icons.my_location),
+                        label: const Text('Center on Bus'),
+                      ),
+                    ),
+                    
+                    // Route Progress Card
+                    AppTheme.professionalCard(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Route Progress',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  '${appState.students.where((s) => s['picked']).length} / ${appState.students.length}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: appState.students.isEmpty 
+                                  ? 0 
+                                  : appState.students.where((s) => s['picked']).length / appState.students.length,
+                                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                                valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                                minHeight: 8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

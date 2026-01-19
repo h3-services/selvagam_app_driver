@@ -26,33 +26,40 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Selvagam',
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
+      body: AppTheme.gradientBackground(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // App Logo
+              Image.asset(
+                'assets/images/logo.png',
+                width: 180,
+                height: 180,
               ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Santhanalakshmi Noble School\nin Tirukalikundram',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                color: AppTheme.textSecondary,
+              const SizedBox(height: 60),
+              const Text(
+                'SELVAGAM',
+                style: TextStyle(
+                  fontSize: 42,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF2C3E50),
+                  letterSpacing: 2,
+                ),
               ),
-            ),
-            SizedBox(height: 40),
-            CircularProgressIndicator(
-              color: AppTheme.primaryColor,
-            ),
-          ],
+              const SizedBox(height: 8),
+              const Text(
+                'DRIVER   APP',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black54,
+                  letterSpacing: 6,
+                ),
+              ),
+              const SizedBox(height: 100),
+            ],
+          ),
         ),
       ),
     );
