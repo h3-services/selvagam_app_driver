@@ -83,6 +83,27 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
 
+                    const SizedBox(height: 24),
+                    
+                    // History Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showHistory(context, appState),
+                        icon: const Icon(Icons.history_rounded),
+                        label: const Text(
+                          'View Trip History',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppTheme.primaryColor,
+                          side: const BorderSide(color: AppTheme.primaryColor),
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 48),
 
                     // Logout button
@@ -166,8 +187,15 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: () => _showRouteSelection(context, appState),
-          icon: const Icon(Icons.edit_note, color: AppTheme.primaryColor),
+          onPressed: appState.isTripActive 
+            ? () => ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Cannot change route during an active trip'))
+              )
+            : () => _showRouteSelection(context, appState),
+          icon: Icon(
+            Icons.edit_note, 
+            color: appState.isTripActive ? Colors.grey : AppTheme.primaryColor
+          ),
           tooltip: 'Change Route',
         ),
       ],
@@ -200,6 +228,69 @@ class ProfileScreen extends StatelessWidget {
             child: const Text('Logout'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showHistory(BuildContext context, AppState appState) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Text(
+              'Trip History',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: appState.tripHistory.isEmpty
+                  ? const Center(child: Text('No trips recorded yet.'))
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: appState.tripHistory.length,
+                      itemBuilder: (context, index) {
+                        final trip = appState.tripHistory[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: trip['type'] == 'Morning' ? AppTheme.morningColor : AppTheme.eveningColor,
+                              child: Icon(trip['type'] == 'Morning' ? Icons.wb_sunny : Icons.nightlight_round, color: Colors.white, size: 18),
+                            ),
+                            title: Text(trip['route'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text('${trip['date']} • ${trip['startTime']} - ${trip['endTime']}'),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text('${trip['studentsPicked']}/${trip['totalStudents']}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                                const Text('students', style: TextStyle(fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

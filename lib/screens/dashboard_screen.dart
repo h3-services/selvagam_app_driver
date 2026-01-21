@@ -45,6 +45,7 @@ class DashboardScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
                         children: [
+                          _buildTripTypeSelector(context, appState),
                           // Driver Info Card
                           AppTheme.professionalCard(
                             child: Padding(
@@ -64,8 +65,16 @@ class DashboardScreen extends StatelessWidget {
                                         ),
                                       ),
                                       IconButton(
-                                        onPressed: () => _showRouteSelection(context, appState),
-                                        icon: const Icon(Icons.edit_road, size: 22, color: AppTheme.primaryColor),
+                                        onPressed: appState.isTripActive 
+                                          ? () => ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text('Cannot change route during an active trip'))
+                                            )
+                                          : () => _showRouteSelection(context, appState),
+                                        icon: Icon(
+                                          Icons.edit_road, 
+                                          size: 22, 
+                                          color: appState.isTripActive ? Colors.grey : AppTheme.primaryColor
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -138,14 +147,14 @@ class DashboardScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  const Row(
+                                  Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.access_time, size: 18, color: Colors.white70),
+                                      const Icon(Icons.access_time, size: 18, color: Colors.white70),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Time: 7:30 AM',
-                                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                                        'Time: ${appState.nextPickupTime}',
+                                        style: const TextStyle(fontSize: 16, color: Colors.white70),
                                       ),
                                     ],
                                   ),
@@ -231,26 +240,27 @@ class DashboardScreen extends StatelessWidget {
                           const SizedBox(height: 16),
                           
                           // Secondary Action
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton.icon(
-                              onPressed: () => Navigator.pushNamed(context, '/route-tracking'),
-                              icon: const Icon(Icons.map_outlined),
-                              label: const Text(
-                                'View Full Route',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1F1645),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          if (appState.isTripActive)
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton.icon(
+                                onPressed: () => Navigator.pushNamed(context, '/route-tracking'),
+                                icon: const Icon(Icons.map_outlined),
+                                label: const Text(
+                                  'View Full Route',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                                 ),
-                                elevation: 2,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1F1645),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 2,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -264,8 +274,83 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildTripTypeSelector(BuildContext context, AppState appState) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: appState.isTripActive 
+                ? () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Cannot change trip type during an active trip'))
+                  )
+                : () {
+                    appState.setTripType('Morning');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Switched to Morning Trip'), duration: Duration(seconds: 1)),
+                    );
+                  },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: appState.selectedTripType == 'Morning' ? AppTheme.morningColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'Morning Trip',
+                    style: TextStyle(
+                      color: appState.selectedTripType == 'Morning' ? Colors.white : AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: appState.isTripActive 
+                ? () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Cannot change trip type during an active trip'))
+                  )
+                : () {
+                    appState.setTripType('Evening');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Switched to Evening Trip'), duration: Duration(seconds: 1)),
+                    );
+                  },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: appState.selectedTripType == 'Evening' ? AppTheme.eveningColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    'Evening Trip',
+                    style: TextStyle(
+                      color: appState.selectedTripType == 'Evening' ? Colors.white : AppTheme.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showRouteSelection(BuildContext context, AppState appState) {
-    final routes = ['Route A - Main Street', 'Route B - School Road', 'Route C - Park Avenue'];
+    final routes = appState.availableRoutes;
     
     showDialog(
       context: context,
